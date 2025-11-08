@@ -111,7 +111,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           font-size: 14px;
           white-space: nowrap;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          z-index: 1000;
+          z-index: 10000;
           pointer-events: none;
           font-family: 'Torus Pro', Torus, ui-sans-serif, system-ui, sans-serif;
         }
