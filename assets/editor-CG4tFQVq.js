@@ -1,0 +1,1 @@
+import{j as r}from"./vendor-react-DSDO45ti.js";import{E as o}from"./editor-lib-DxLfvF__.js";import"./vendor-C7hE6RIs.js";import"./beatmap-preview-D8wqu_U-.js";function s(){return r.jsx(o,{})}export{s as Editor};
