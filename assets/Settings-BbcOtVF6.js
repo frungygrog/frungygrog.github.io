@@ -1,0 +1,1 @@
+import{j as e}from"./vendor-react-DlOpOyxn.js";import"./vendor-DFcCRmls.js";function i(){return e.jsxs("div",{className:"col",style:{gap:12},children:[e.jsx("div",{className:"title",style:{fontSize:"2em"},children:"Settings"}),e.jsx("div",{className:"section-panel",children:e.jsx("div",{className:"muted",children:"Settings page coming soon..."})})]})}export{i as default};
