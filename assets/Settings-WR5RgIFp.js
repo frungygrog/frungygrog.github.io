@@ -1,1 +1,0 @@
-import{j as e}from"./vendor-react-C7NF2CWg.js";import"./vendor-RuoRctBR.js";function i(){return e.jsxs("div",{className:"col",style:{gap:12},children:[e.jsx("div",{className:"title",style:{fontSize:"2em"},children:"Settings"}),e.jsx("div",{className:"section-panel",children:e.jsx("div",{className:"muted",children:"Settings page coming soon..."})})]})}export{i as default};
