@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>mappi!</title>
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {}
+      })();
+    </script>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a1a1a" />
@@ -46,7 +56,7 @@
     <meta property="twitter:title" content="mappi!" />
     <meta property="twitter:description" content="give/get inspo for your next map! :>" />
     <meta property="twitter:image" content="https://catawba.s-ul.eu/LgppxZrF" />
-    <script type="module" crossorigin src="/assets/index-BgmXJ8oZ.js"></script>
+    <script type="module" crossorigin src="/assets/index-C8jztOzS.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-z7ElObC4.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-react-BcztRRPo.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-hls-B_fsdCYC.js">
@@ -55,10 +65,10 @@
     <link rel="modulepreload" crossorigin href="/assets/editor-BU8nWiSI.js">
     <link rel="modulepreload" crossorigin href="/assets/mappi-routes-BZhmWKjA.js">
     <link rel="modulepreload" crossorigin href="/assets/editor-components-BMK_t3kA.js">
-    <link rel="modulepreload" crossorigin href="/assets/moddi-routes-DDPXbCam.js">
+    <link rel="modulepreload" crossorigin href="/assets/moddi-routes-CihKxL8M.js">
     <link rel="stylesheet" crossorigin href="/assets/editor-CG1yLUbS.css">
     <link rel="stylesheet" crossorigin href="/assets/editor-components-Bzmrvihl.css">
-    <link rel="stylesheet" crossorigin href="/assets/index-B5Er8O1r.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-0I8ji32m.css">
   </head>
   <body>
     <div id="root"></div>
