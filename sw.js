@@ -1,77 +1,96 @@
 // Service Worker for mappi! PWA
-const CACHE_NAME = 'mappi-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
+// Strategy:
+// - Navigation requests (documents): network-first to always get latest index.html
+// - Static assets (js/css/img/font): cache-first (Vite hashed filenames are safe to cache)
+// - API and other requests: go to network
+// - Offline fallback to cached /index.html when navigation fails
+
+const STATIC_CACHE = 'mappi-static-v2';
+const PRECACHE_URLS = [
+  '/index.html', // offline fallback only; navigation uses network-first
   '/favicon.ico',
   '/icon.png',
   '/192.png',
-  '/512.png'
+  '/512.png',
+  '/manifest.json'
 ];
 
-// Install event - cache resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((error) => {
-        console.error('Cache install failed:', error);
-      })
+    caches.open(STATIC_CACHE)
+      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .catch((err) => console.warn('SW install: precache failed', err))
   );
-  // Force the waiting service worker to become the active service worker
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  // Take control of all pages immediately
-  return self.clients.claim();
+  event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(
+      names.map((n) => (n !== STATIC_CACHE ? caches.delete(n) : Promise.resolve()))
+    );
+    await self.clients.claim();
+  })());
 });
 
-// Fetch event - serve from cache, fallback to network
+function isSameOrigin(url) {
+  try {
+    const u = new URL(url, self.location.origin);
+    return u.origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request).then((response) => {
-          // Don't cache non-GET requests or non-successful responses
-          if (event.request.method !== 'GET' || !response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
+  const req = event.request;
+  const url = new URL(req.url);
 
-          // Clone the response
-          const responseToCache = response.clone();
+  // Only handle same-origin requests
+  if (!isSameOrigin(req.url)) return;
 
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
+  // Never cache API calls
+  if (url.pathname.startsWith('/api/')) return;
 
-          return response;
+  // Network-first for navigations/documents to pick up new builds immediately
+  const isNav = req.mode === 'navigate' || req.destination === 'document';
+  if (isNav) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          // Optionally cache the latest index.html as fallback
+          const copy = res.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put('/index.html', copy)).catch(() => {});
+          return res;
+        })
+        .catch(async () => {
+          // Offline fallback to cached index
+          const fallback = await caches.match('/index.html');
+          return fallback || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        })
+    );
+    return;
+  }
+
+  // Cache-first for static assets (hashed files)
+  const isStatic = ['script', 'style', 'image', 'font'].includes(req.destination) || /\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?)$/i.test(url.pathname);
+  if (isStatic && req.method === 'GET') {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          if (!res || res.status !== 200) return res;
+          const copy = res.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
+          return res;
         });
       })
-      .catch(() => {
-        // If both cache and network fail, return offline page if available
-        if (event.request.destination === 'document') {
-          return caches.match('/index.html');
-        }
-      })
-  );
+    );
+    return;
+  }
+
+  // Default: network
+  // Let the request pass through without interception
 });
 
