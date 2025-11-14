@@ -95,6 +95,9 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Push notifications: attempt to fetch the latest notification to show a contextual message.
+const SW_URL = new URL(self.location.href)
+const API_BASE = SW_URL.searchParams.get('api') || ''
+
 self.addEventListener('push', (event) => {
   const fallback = {
     title: 'mappi!',
@@ -103,7 +106,8 @@ self.addEventListener('push', (event) => {
   }
   event.waitUntil((async () => {
     try {
-      const res = await fetch('/api/me/notifications', { credentials: 'include' })
+      const endpoint = API_BASE ? `${API_BASE}/api/me/notifications` : '/api/me/notifications'
+      const res = await fetch(endpoint, { credentials: 'include' })
       if (res && res.ok) {
         const j = await res.json().catch(() => null)
         const items = Array.isArray(j?.items) ? j.items : []
