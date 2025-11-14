@@ -164,6 +164,9 @@ self.addEventListener('push', (event) => {
             body,
             icon: '/192.png',
             badge: '/192.png',
+            tag: 'mappi-notification',
+            renotify: false,
+            requireInteraction: false,
             data: { url },
           })
           return
@@ -174,6 +177,9 @@ self.addEventListener('push', (event) => {
       body: fallback.body,
       icon: '/192.png',
       badge: '/192.png',
+      tag: 'mappi-notification',
+      renotify: false,
+      requireInteraction: false,
       data: { url: fallback.url },
     })
   })())
