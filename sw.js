@@ -113,35 +113,31 @@ self.addEventListener('push', (event) => {
         const items = Array.isArray(j?.items) ? j.items : []
         const newest = items[0]
         if (newest) {
-          let title = 'mappi!'
           let body = 'You have a new notification'
           let url = '/#/'
           const kind = String(newest.kind || '')
           const text = newest.text || ''
+          const notifId = newest.id || Date.now()
+          
           switch (kind) {
             case 'comment':
-              title = 'New comment'
-              body = text || 'Someone commented on your post'
+              body = text || 'Someone commented on your post.'
               url = '/#/mp/feed'
               break
             case 'reaction':
-              title = 'New reaction'
-              body = text || 'Someone reacted to your post'
+              body = text || 'Someone reacted to your post.'
               url = '/#/md/feed'
               break
             case 'star':
-              title = 'Your post was starred'
-              body = 'A moderator starred your post'
+              body = 'A moderator starred your post.'
               url = '/#/mp/feed'
               break
             case 'likes5':
-              title = 'Milestone reached'
               body = 'Your post hit 5 likes!'
               url = '/#/mp/feed'
               break
             case 'inspiration':
-              title = 'New inspiration'
-              body = text || 'Someone is inspired by you'
+              body = text || 'Someone marked you as an inspiration!'
               url = '/#/profile'
               break
             case 'system':
@@ -149,22 +145,20 @@ self.addEventListener('push', (event) => {
               let parsed = null
               try { parsed = text && typeof text === 'string' ? JSON.parse(text) : null } catch {}
               if (parsed && parsed.type === 'queue_invite') {
-                title = 'Queue invitation'
                 body = `${parsed.inviter_username || 'Someone'} invited you to ${parsed.queue_name || 'a queue'}`
                 url = '/#/md/queues'
               } else {
-                title = 'Notification'
                 body = (typeof text === 'string' && text) ? text : 'You have a new notification'
                 url = '/#/'
               }
               break
             }
           }
-          await self.registration.showNotification(title, {
+          await self.registration.showNotification('mappi!', {
             body,
             icon: '/192.png',
             badge: '/192.png',
-            tag: 'mappi-notification',
+            tag: `mappi-${notifId}`,
             renotify: false,
             requireInteraction: false,
             data: { url },
@@ -173,11 +167,11 @@ self.addEventListener('push', (event) => {
         }
       }
     } catch {}
-    await self.registration.showNotification(fallback.title, {
+    await self.registration.showNotification('mappi!', {
       body: fallback.body,
       icon: '/192.png',
       badge: '/192.png',
-      tag: 'mappi-notification',
+      tag: `mappi-${Date.now()}`,
       renotify: false,
       requireInteraction: false,
       data: { url: fallback.url },
