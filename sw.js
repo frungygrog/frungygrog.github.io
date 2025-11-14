@@ -94,3 +94,95 @@ self.addEventListener('fetch', (event) => {
   // Let the request pass through without interception
 });
 
+// Push notifications: attempt to fetch the latest notification to show a contextual message.
+self.addEventListener('push', (event) => {
+  const fallback = {
+    title: 'mappi!',
+    body: 'You have a new notification',
+    url: '/#/',
+  }
+  event.waitUntil((async () => {
+    try {
+      const res = await fetch('/api/me/notifications', { credentials: 'include' })
+      if (res && res.ok) {
+        const j = await res.json().catch(() => null)
+        const items = Array.isArray(j?.items) ? j.items : []
+        const newest = items[0]
+        if (newest) {
+          let title = 'mappi!'
+          let body = 'You have a new notification'
+          let url = '/#/'
+          const kind = String(newest.kind || '')
+          const text = newest.text || ''
+          switch (kind) {
+            case 'comment':
+              title = 'New comment'
+              body = text || 'Someone commented on your post'
+              url = '/#/mp/feed'
+              break
+            case 'reaction':
+              title = 'New reaction'
+              body = text || 'Someone reacted to your post'
+              url = '/#/md/feed'
+              break
+            case 'star':
+              title = 'Your post was starred'
+              body = 'A moderator starred your post'
+              url = '/#/mp/feed'
+              break
+            case 'likes5':
+              title = 'Milestone reached'
+              body = 'Your post hit 5 likes!'
+              url = '/#/mp/feed'
+              break
+            case 'inspiration':
+              title = 'New inspiration'
+              body = text || 'Someone is inspired by you'
+              url = '/#/profile'
+              break
+            case 'system':
+            default: {
+              let parsed = null
+              try { parsed = text && typeof text === 'string' ? JSON.parse(text) : null } catch {}
+              if (parsed && parsed.type === 'queue_invite') {
+                title = 'Queue invitation'
+                body = `${parsed.inviter_username || 'Someone'} invited you to ${parsed.queue_name || 'a queue'}`
+                url = '/#/md/queues'
+              } else {
+                title = 'Notification'
+                body = (typeof text === 'string' && text) ? text : 'You have a new notification'
+                url = '/#/'
+              }
+              break
+            }
+          }
+          await self.registration.showNotification(title, {
+            body,
+            icon: '/192.png',
+            badge: '/192.png',
+            data: { url },
+          })
+          return
+        }
+      }
+    } catch {}
+    await self.registration.showNotification(fallback.title, {
+      body: fallback.body,
+      icon: '/192.png',
+      badge: '/192.png',
+      data: { url: fallback.url },
+    })
+  })())
+})
+
+self.addEventListener('notificationclick', (event) => {
+  const url = event.notification?.data?.url || '/#/'
+  event.notification.close()
+  event.waitUntil((async () => {
+    const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true })
+    const existing = clientList.find(c => typeof c.url === 'string' && c.url.includes(url))
+    if (existing) { await existing.focus(); return }
+    await clients.openWindow(url)
+  })())
+})
+
