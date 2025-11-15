@@ -114,31 +114,33 @@ self.addEventListener('push', (event) => {
         const newest = items[0]
         if (newest) {
           let body = 'You have a new notification'
-          let url = '/#/'
           const kind = String(newest.kind || '')
           const text = newest.text || ''
           const notifId = newest.id || Date.now()
-          
+          const targetPath = typeof newest.targetPath === 'string' ? newest.targetPath.trim() : ''
+          const normalizedTargetUrl = targetPath.startsWith('/') ? `/#${targetPath}` : null
+          let url = normalizedTargetUrl || '/#/'
+
           switch (kind) {
             case 'comment':
               body = text || 'Someone commented on your post.'
-              url = '/#/mp/feed'
+              if (!normalizedTargetUrl) url = '/#/mp/feed'
               break
             case 'reaction':
               body = text || 'Someone reacted to your post.'
-              url = '/#/md/feed'
+              if (!normalizedTargetUrl) url = '/#/md/feed'
               break
             case 'star':
               body = 'A moderator starred your post.'
-              url = '/#/mp/feed'
+              if (!normalizedTargetUrl) url = '/#/mp/feed'
               break
             case 'likes5':
               body = 'Your post hit 5 likes!'
-              url = '/#/mp/feed'
+              if (!normalizedTargetUrl) url = '/#/mp/feed'
               break
             case 'inspiration':
               body = text || 'Someone marked you as an inspiration!'
-              url = '/#/profile'
+              if (!normalizedTargetUrl) url = '/#/profile'
               break
             case 'system':
             default: {
@@ -146,10 +148,10 @@ self.addEventListener('push', (event) => {
               try { parsed = text && typeof text === 'string' ? JSON.parse(text) : null } catch {}
               if (parsed && parsed.type === 'queue_invite') {
                 body = `${parsed.inviter_username || 'Someone'} invited you to ${parsed.queue_name || 'a queue'}`
-                url = '/#/md/queues'
+                if (!normalizedTargetUrl) url = '/#/md/queues'
               } else {
                 body = (typeof text === 'string' && text) ? text : 'You have a new notification'
-                url = '/#/'
+                if (!normalizedTargetUrl) url = '/#/'
               }
               break
             }
