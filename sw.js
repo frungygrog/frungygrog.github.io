@@ -106,7 +106,7 @@ self.addEventListener('push', (event) => {
   }
   event.waitUntil((async () => {
     try {
-      const endpoint = API_BASE ? `${API_BASE}/api/me/notifications` : '/api/me/notifications'
+      const endpoint = API_BASE ? `${API_BASE}/api/me/notifications/detailed` : '/api/me/notifications/detailed'
       const res = await fetch(endpoint, { credentials: 'include' })
       if (res && res.ok) {
         const j = await res.json().catch(() => null)
