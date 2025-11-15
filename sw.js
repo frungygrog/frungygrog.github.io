@@ -100,7 +100,7 @@ const API_BASE = SW_URL.searchParams.get('api') || ''
 
 self.addEventListener('push', (event) => {
   const fallback = {
-    title: 'mappi!',
+    title: '',
     body: 'You have a new notification',
     url: '/#/',
   }
