@@ -40,7 +40,6 @@ import{s as vt,t as Te,v as be,w as qe,r,e as rt,R as ae,j as e,c as Ne,x as it,
           padding: 6px 10px;
           font-size: 14px;
           white-space: nowrap;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
           z-index: 10000;
           pointer-events: none;
           font-family: 'Torus Pro', Torus, ui-sans-serif, system-ui, sans-serif;
